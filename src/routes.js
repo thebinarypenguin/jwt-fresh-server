@@ -31,7 +31,7 @@ router.post('/login', (req, res) => {
     });
 });
 
-router.post('/refresh', (req, res) => {
+router.get('/refresh', (req, res) => {
 
   const authorization = req.get('Authorization');
 
@@ -45,10 +45,12 @@ router.post('/refresh', (req, res) => {
     .checkToken(token, config.jwt_secret)
     .then((payload) => {
 
+      const { username } = payload;
+
       TokenService
-        .createToken(payload, config.jwt_secret)
-        .then((token) => {
-          res.status(200).json({ token: token });
+        .createToken({ username }, config.jwt_secret, { expiresIn: config.jwt_expiry })
+        .then((newToken) => {
+          res.status(200).json({ token: newToken });
         })
         .catch((err) => {
           res.status(500).json({ error: 'error creating token' });
