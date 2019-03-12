@@ -62,4 +62,29 @@ router.get('/refresh', (req, res) => {
     });
 });
 
+router.get('/public-test', (req, res) => {
+
+  res.status(200).json({ message: "I'm a public route" });
+});
+
+router.get('/protected-test', (req, res) => {
+
+  const authorization = req.get('Authorization');
+
+  if (!authorization) {
+    return res.status(400).json({ error: 'authorization not provided' });
+  }
+
+  const token = authorization.slice(7);
+
+  TokenService
+    .checkToken(token, config.jwt_secret)
+    .then((payload) => {
+      res.status(200).json({ message: "I'm a protected route" });
+    })
+    .catch((err) => {
+      res.status(401).json({ error: 'invalid authorization' });
+    });
+});
+
 module.exports = router;
